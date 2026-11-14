@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4269768730900812488}
   - component: {fileID: 5111325316641883503}
   - component: {fileID: 6104317956024009498}
+  - component: {fileID: -7556166565473949339}
   m_Layer: 0
   m_Name: ItemSlotPrefab
   m_TagString: Untagged
@@ -121,6 +122,31 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &-7556166565473949339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 813660314312307957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eef1f8ff94a28774dadedcfd7e726f2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSlotUI
+  selectButton: {fileID: 0}
+  cardBackground: {fileID: 0}
+  statsContainer: {fileID: 0}
+  circleIcon: {fileID: 0}
+  nameText: {fileID: 0}
+  statPipPrefab: {fileID: 0}
+  normalCardColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
+  selectedCardColor: {r: 0.65, g: 0.9, b: 0.7, a: 1}
+  normalCircleColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedCircleColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+  redColor: {r: 0.9, g: 0.25, b: 0.25, a: 1}
+  yellowColor: {r: 0.95, g: 0.8, b: 0.2, a: 1}
+  greenColor: {r: 0.25, g: 0.8, b: 0.35, a: 1}
 --- !u!1 &8832303795566185025
 GameObject:
   m_ObjectHideFlags: 0
