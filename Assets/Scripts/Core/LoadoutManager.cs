@@ -13,8 +13,11 @@ public class LoadoutManager : MonoBehaviour
     [Header("Sistem Tab Kategori (Urutan: 0=Pohon, 1=Air, 2=Pupuk, 3=Item)")]
     [SerializeField] private GameObject[] categoryPanels;
     [SerializeField] private Button[] tabButtons;
-    [SerializeField] private Color activeTabColor = Color.white;
-    [SerializeField] private Color inactiveTabColor = new Color(0.75f, 0.75f, 0.75f, 1f);
+    [SerializeField] private Image[] tabIcons;
+    [SerializeField] private RectTransform activeCircle;
+    [SerializeField] private float tabSlideSpeed = 15f;
+    [Range(0f, 1f)][SerializeField] private float activeIconAlpha = 1f;
+    [Range(0f, 1f)][SerializeField] private float inactiveIconAlpha = 0.35f;
 
     [Header("Tombol Submission")]
     [SerializeField] private Button submitButton;
@@ -47,11 +50,12 @@ public class LoadoutManager : MonoBehaviour
     [SerializeField] private Transform yellowBarContainer;
     [SerializeField] private Transform greenBarContainer;
 
-    [Header("Warna Pengisian Bar Target")]
+    [Header("Warna Pengisian Bar Target & Hover Preview")]
     [SerializeField] private Color emptySlotColor = Color.white;
     [SerializeField] private Color filledRedColor = new Color(0.9f, 0.25f, 0.25f);
     [SerializeField] private Color filledYellowColor = new Color(0.95f, 0.8f, 0.2f);
     [SerializeField] private Color filledGreenColor = new Color(0.25f, 0.8f, 0.35f);
+    [Range(0f, 1f)][SerializeField] private float hoverPreviewAlpha = 0.7f;
 
     private ItemSlotUI selectedTree;
     private ItemSlotUI selectedWater;
@@ -67,6 +71,10 @@ public class LoadoutManager : MonoBehaviour
     private int finalYellow;
     private int finalGreen;
 
+    private ItemSlotUI hoveredSlot;
+    private float targetCircleX;
+    private bool hasInitializedCircle;
+
     private void Start()
     {
         SetupTabsAndSubmit();
@@ -74,17 +82,41 @@ public class LoadoutManager : MonoBehaviour
         PopulateAllCategories();
         RecalculateAndRefreshUI();
 
-        // Buka tab pertama (Pohon) saat mulai
-        SwitchTab(0);
+        // Paksa layout tab menghitung posisi awal agar ActiveCircle langsung presisi di frame 1
+        Canvas.ForceUpdateCanvases();
+        SwitchTab(0, instant: true);
+    }
+
+    private void Update()
+    {
+        if (activeCircle != null && hasInitializedCircle)
+        {
+            Vector2 pos = activeCircle.anchoredPosition;
+            pos.x = Mathf.Lerp(pos.x, targetCircleX, Time.deltaTime * tabSlideSpeed);
+            activeCircle.anchoredPosition = pos;
+        }
     }
 
     private void SetupTabsAndSubmit()
     {
+        // Auto-isi tabIcons dari child Image di dalam masing-masing tombol jika belum diisi di Inspector
+        if (tabIcons == null || tabIcons.Length != tabButtons.Length)
+        {
+            tabIcons = new Image[tabButtons.Length];
+            for (int i = 0; i < tabButtons.Length; i++)
+            {
+                if (tabButtons[i] != null && tabButtons[i].transform.childCount > 0)
+                {
+                    tabIcons[i] = tabButtons[i].transform.GetChild(0).GetComponent<Image>();
+                }
+            }
+        }
+
         for (int i = 0; i < tabButtons.Length; i++)
         {
             int index = i;
             tabButtons[i].onClick.RemoveAllListeners();
-            tabButtons[i].onClick.AddListener(() => SwitchTab(index));
+            tabButtons[i].onClick.AddListener(() => SwitchTab(index, instant: false));
         }
 
         if (submitButton != null)
@@ -96,17 +128,36 @@ public class LoadoutManager : MonoBehaviour
 
     public void SwitchTab(int activeIndex)
     {
+        SwitchTab(activeIndex, instant: false);
+    }
+
+    private void SwitchTab(int activeIndex, bool instant)
+    {
         for (int i = 0; i < categoryPanels.Length; i++)
         {
             bool isActive = (i == activeIndex);
             if (categoryPanels[i] != null)
                 categoryPanels[i].SetActive(isActive);
 
-            if (i < tabButtons.Length && tabButtons[i] != null)
+            if (i < tabIcons.Length && tabIcons[i] != null)
             {
-                Image tabImg = tabButtons[i].GetComponent<Image>();
-                if (tabImg != null)
-                    tabImg.color = isActive ? activeTabColor : inactiveTabColor;
+                Color c = tabIcons[i].color;
+                c.a = isActive ? activeIconAlpha : inactiveIconAlpha;
+                tabIcons[i].color = c;
+            }
+        }
+
+        if (activeCircle != null && activeIndex >= 0 && activeIndex < tabButtons.Length && tabButtons[activeIndex] != null)
+        {
+            RectTransform targetBtnRect = tabButtons[activeIndex].GetComponent<RectTransform>();
+            targetCircleX = targetBtnRect.anchoredPosition.x;
+            hasInitializedCircle = true;
+
+            if (instant)
+            {
+                Vector2 pos = activeCircle.anchoredPosition;
+                pos.x = targetCircleX;
+                activeCircle.anchoredPosition = pos;
             }
         }
     }
@@ -152,6 +203,21 @@ public class LoadoutManager : MonoBehaviour
         {
             ItemSlotUI slot = Instantiate(itemSlotPrefab, container);
             slot.Setup(data, this);
+        }
+    }
+
+    public void OnItemHoverEnter(ItemSlotUI slot)
+    {
+        hoveredSlot = slot;
+        RefreshBarDisplay();
+    }
+
+    public void OnItemHoverExit(ItemSlotUI slot)
+    {
+        if (hoveredSlot == slot)
+        {
+            hoveredSlot = null;
+            RefreshBarDisplay();
         }
     }
 
@@ -234,9 +300,65 @@ public class LoadoutManager : MonoBehaviour
         finalYellow = Mathf.Clamp(rawYellow, 0, targetYellow);
         finalGreen = Mathf.Clamp(rawGreen, 0, targetGreen);
 
-        UpdateBarVisual(redTargetSlots, finalRed, filledRedColor);
-        UpdateBarVisual(yellowTargetSlots, finalYellow, filledYellowColor);
-        UpdateBarVisual(greenTargetSlots, finalGreen, filledGreenColor);
+        RefreshBarDisplay();
+    }
+
+    private void RefreshBarDisplay()
+    {
+        if (hoveredSlot == null)
+        {
+            UpdateBarWithPreview(redTargetSlots, finalRed, finalRed, filledRedColor);
+            UpdateBarWithPreview(yellowTargetSlots, finalYellow, finalYellow, filledYellowColor);
+            UpdateBarWithPreview(greenTargetSlots, finalGreen, finalGreen, filledGreenColor);
+            return;
+        }
+
+        CalculateSimulatedStats(hoveredSlot, out int simRed, out int simYellow, out int simGreen);
+
+        UpdateBarWithPreview(redTargetSlots, finalRed, simRed, filledRedColor);
+        UpdateBarWithPreview(yellowTargetSlots, finalYellow, simYellow, filledYellowColor);
+        UpdateBarWithPreview(greenTargetSlots, finalGreen, simGreen, filledGreenColor);
+    }
+
+    private void CalculateSimulatedStats(ItemSlotUI hoverSlot, out int simRed, out int simYellow, out int simGreen)
+    {
+        ItemSlotUI simWater = selectedWater;
+        ItemSlotUI simFert = selectedFertilizer;
+        List<ItemSlotUI> simItems = new List<ItemSlotUI>(selectedItems);
+
+        switch (hoverSlot.ItemData.category)
+        {
+            case ItemCategory.Air:
+                simWater = (simWater == hoverSlot) ? null : hoverSlot;
+                break;
+
+            case ItemCategory.Pupuk:
+                simFert = (simFert == hoverSlot) ? null : hoverSlot;
+                break;
+
+            case ItemCategory.Item:
+                if (simItems.Contains(hoverSlot))
+                    simItems.Remove(hoverSlot);
+                else if (simItems.Count < MAX_GENERAL_ITEMS)
+                    simItems.Add(hoverSlot);
+                break;
+        }
+
+        int rawRed = 0;
+        int rawYellow = 0;
+        int rawGreen = 0;
+
+        AddStats(simWater, ref rawRed, ref rawYellow, ref rawGreen);
+        AddStats(simFert, ref rawRed, ref rawYellow, ref rawGreen);
+
+        foreach (ItemSlotUI item in simItems)
+        {
+            AddStats(item, ref rawRed, ref rawYellow, ref rawGreen);
+        }
+
+        simRed = Mathf.Clamp(rawRed, 0, targetRed);
+        simYellow = Mathf.Clamp(rawYellow, 0, targetYellow);
+        simGreen = Mathf.Clamp(rawGreen, 0, targetGreen);
     }
 
     private void AddStats(ItemSlotUI slot, ref int red, ref int yellow, ref int green)
@@ -247,11 +369,28 @@ public class LoadoutManager : MonoBehaviour
         green += slot.ItemData.hijau;
     }
 
-    private void UpdateBarVisual(List<Image> slots, int filledCount, Color activeColor)
+    private void UpdateBarWithPreview(List<Image> slots, int currentCount, int previewCount, Color activeColor)
     {
         for (int i = 0; i < slots.Count; i++)
         {
-            slots[i].color = (i < filledCount) ? activeColor : emptySlotColor;
+            if (previewCount >= currentCount)
+            {
+                if (i < currentCount)
+                    slots[i].color = new Color(activeColor.r, activeColor.g, activeColor.b, 1f);
+                else if (i < previewCount)
+                    slots[i].color = new Color(activeColor.r, activeColor.g, activeColor.b, hoverPreviewAlpha);
+                else
+                    slots[i].color = emptySlotColor;
+            }
+            else
+            {
+                if (i < previewCount)
+                    slots[i].color = new Color(activeColor.r, activeColor.g, activeColor.b, 1f);
+                else if (i < currentCount)
+                    slots[i].color = new Color(activeColor.r, activeColor.g, activeColor.b, 0.3f);
+                else
+                    slots[i].color = emptySlotColor;
+            }
         }
     }
 

@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
-public class ItemSlotUI : MonoBehaviour
+public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Komponen UI Kartu (Wajib)")]
     [SerializeField] private Button selectButton;
@@ -90,5 +91,23 @@ public class ItemSlotUI : MonoBehaviour
 
         if (circleIcon != null)
             circleIcon.color = isSelected ? selectedCircleColor : normalCircleColor;
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (manager != null)
+            manager.OnItemHoverEnter(this);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (manager != null)
+            manager.OnItemHoverExit(this);
+    }
+
+    private void OnDisable()
+    {
+        if (manager != null)
+            manager.OnItemHoverExit(this);
     }
 }

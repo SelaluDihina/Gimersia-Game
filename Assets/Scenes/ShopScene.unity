@@ -1464,8 +1464,11 @@ MonoBehaviour:
   - {fileID: 1308037130}
   - {fileID: 1365928909}
   - {fileID: 1607090267}
-  activeTabColor: {r: 1, g: 1, b: 1, a: 1}
-  inactiveTabColor: {r: 0.75, g: 0.75, b: 0.75, a: 1}
+  tabIcons: []
+  activeCircle: {fileID: 1455664317}
+  tabSlideSpeed: 15
+  activeIconAlpha: 1
+  inactiveIconAlpha: 0.35
   submitButton: {fileID: 1393493385}
   treeItems:
   - {fileID: 11400000, guid: 9051773ebb3e6294ea106b9fccd9a57a, type: 2}
@@ -1497,6 +1500,7 @@ MonoBehaviour:
   filledRedColor: {r: 0.91764706, g: 0.13333334, b: 0.13333334, a: 1}
   filledYellowColor: {r: 0.91764706, g: 0.8784314, b: 0.13333334, a: 1}
   filledGreenColor: {r: 0.13333334, g: 0.91764706, b: 0.2509804, a: 1}
+  hoverPreviewAlpha: 0.7
 --- !u!4 &849291129
 Transform:
   m_ObjectHideFlags: 0
