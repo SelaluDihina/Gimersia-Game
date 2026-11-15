@@ -134,12 +134,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eef1f8ff94a28774dadedcfd7e726f2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemSlotUI
-  selectButton: {fileID: 0}
-  cardBackground: {fileID: 0}
-  statsContainer: {fileID: 0}
+  selectButton: {fileID: 6104317956024009498}
+  cardBackground: {fileID: 5111325316641883503}
+  statsContainer: {fileID: 5223431895248060644}
   circleIcon: {fileID: 0}
   nameText: {fileID: 0}
-  statPipPrefab: {fileID: 0}
+  statPipPrefab: {fileID: 6868055830363350731, guid: c0ce374707d4b1d4db71f83d438f2d22, type: 3}
   normalCardColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
   selectedCardColor: {r: 0.65, g: 0.9, b: 0.7, a: 1}
   normalCircleColor: {r: 1, g: 1, b: 1, a: 1}
