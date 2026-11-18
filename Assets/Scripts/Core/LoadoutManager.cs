@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,6 +19,11 @@ public class LoadoutManager : MonoBehaviour
     [SerializeField] private float tabSlideSpeed = 15f;
     [Range(0f, 1f)][SerializeField] private float activeIconAlpha = 1f;
     [Range(0f, 1f)][SerializeField] private float inactiveIconAlpha = 0.35f;
+
+    [Header("Animasi Balik Halaman (Notepad Page Curl)")]
+    [SerializeField] private Image pageCurlOverlay;
+    [SerializeField] private Sprite[] curlFrames;
+    [SerializeField] private float curlFrameDuration = 0.035f;
 
     [Header("Tombol Submission")]
     [SerializeField] private Button submitButton;
@@ -74,6 +80,8 @@ public class LoadoutManager : MonoBehaviour
     private ItemSlotUI hoveredSlot;
     private float targetCircleX;
     private bool hasInitializedCircle;
+    private int currentTabIndex = -1;
+    private Coroutine pageCurlCoroutine;
 
     private void Start()
     {
@@ -82,7 +90,9 @@ public class LoadoutManager : MonoBehaviour
         PopulateAllCategories();
         RecalculateAndRefreshUI();
 
-        // Paksa layout tab menghitung posisi awal agar ActiveCircle langsung presisi di frame 1
+        if (pageCurlOverlay != null)
+            pageCurlOverlay.gameObject.SetActive(false);
+
         Canvas.ForceUpdateCanvases();
         SwitchTab(0, instant: true);
     }
@@ -99,7 +109,6 @@ public class LoadoutManager : MonoBehaviour
 
     private void SetupTabsAndSubmit()
     {
-        // Auto-isi tabIcons dari child Image di dalam masing-masing tombol jika belum diisi di Inspector
         if (tabIcons == null || tabIcons.Length != tabButtons.Length)
         {
             tabIcons = new Image[tabButtons.Length];
@@ -133,16 +142,18 @@ public class LoadoutManager : MonoBehaviour
 
     private void SwitchTab(int activeIndex, bool instant)
     {
-        for (int i = 0; i < categoryPanels.Length; i++)
-        {
-            bool isActive = (i == activeIndex);
-            if (categoryPanels[i] != null)
-                categoryPanels[i].SetActive(isActive);
+        if (activeIndex == currentTabIndex && !instant) return;
 
-            if (i < tabIcons.Length && tabIcons[i] != null)
+        bool isForward = activeIndex > currentTabIndex;
+        currentTabIndex = activeIndex;
+
+        // Update warna ikon tab dan posisi target ActiveCircle langsung agar responsif
+        for (int i = 0; i < tabIcons.Length; i++)
+        {
+            if (tabIcons[i] != null)
             {
                 Color c = tabIcons[i].color;
-                c.a = isActive ? activeIconAlpha : inactiveIconAlpha;
+                c.a = (i == activeIndex) ? activeIconAlpha : inactiveIconAlpha;
                 tabIcons[i].color = c;
             }
         }
@@ -160,6 +171,62 @@ public class LoadoutManager : MonoBehaviour
                 activeCircle.anchoredPosition = pos;
             }
         }
+
+        // Jika instan atau aset curl belum dipasang, langsung ganti panel tanpa animasi
+        if (instant || pageCurlOverlay == null || curlFrames == null || curlFrames.Length == 0)
+        {
+            ApplyActivePanel(activeIndex);
+            return;
+        }
+
+        if (pageCurlCoroutine != null)
+            StopCoroutine(pageCurlCoroutine);
+
+        pageCurlCoroutine = StartCoroutine(PlayPageCurlRoutine(activeIndex, isForward));
+    }
+
+    private void ApplyActivePanel(int activeIndex)
+    {
+        for (int i = 0; i < categoryPanels.Length; i++)
+        {
+            if (categoryPanels[i] != null)
+                categoryPanels[i].SetActive(i == activeIndex);
+        }
+    }
+
+    private IEnumerator PlayPageCurlRoutine(int targetPanelIndex, bool isForward)
+    {
+        pageCurlOverlay.gameObject.SetActive(true);
+        int midIndex = curlFrames.Length / 2;
+
+        if (isForward)
+        {
+            // Maju (kanan): Curl_1 -> Curl_5
+            for (int i = 0; i < curlFrames.Length; i++)
+            {
+                pageCurlOverlay.sprite = curlFrames[i];
+                if (i == midIndex)
+                    ApplyActivePanel(targetPanelIndex);
+
+                yield return new WaitForSeconds(curlFrameDuration);
+            }
+        }
+        else
+        {
+            // Mundur (kiri): Curl_5 -> Curl_1
+            for (int i = curlFrames.Length - 1; i >= 0; i--)
+            {
+                pageCurlOverlay.sprite = curlFrames[i];
+                if (i == midIndex)
+                    ApplyActivePanel(targetPanelIndex);
+
+                yield return new WaitForSeconds(curlFrameDuration);
+            }
+        }
+
+        ApplyActivePanel(targetPanelIndex);
+        pageCurlOverlay.gameObject.SetActive(false);
+        pageCurlCoroutine = null;
     }
 
     private void SetupTargetBars()
@@ -295,7 +362,6 @@ public class LoadoutManager : MonoBehaviour
             AddStats(item, ref rawRed, ref rawYellow, ref rawGreen);
         }
 
-        // Double Clamp: mentok di 0 jika minus, dan mentok di target maksimal jika berlebih
         finalRed = Mathf.Clamp(rawRed, 0, targetRed);
         finalYellow = Mathf.Clamp(rawYellow, 0, targetYellow);
         finalGreen = Mathf.Clamp(rawGreen, 0, targetGreen);
