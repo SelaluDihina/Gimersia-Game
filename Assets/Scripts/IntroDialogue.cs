@@ -12,10 +12,14 @@ public class IntroDialogue : MonoBehaviour
     [Header("Player")]
     [SerializeField] private PlayerMovement playerMovement;
 
+    [Header("Input")]
+    [SerializeField] private float doubleClickThreshold = 0.3f;
+
     public static bool IsPlaying { get; private set; }
     public static bool FinishedThisFrame { get; private set; }
 
     private int currentLine;
+    private float lastClickTime = -1f;
 
     private readonly string[] introLines =
     {
@@ -69,11 +73,31 @@ Rasanya, akar-akar sawit itu menyedot habis air tanah tanpa menyisakan apa pun, 
 
     private void Update()
     {
-        if (!IsPlaying || Keyboard.current == null)
+        if (!IsPlaying)
             return;
 
-        if (Keyboard.current.eKey.wasPressedThisFrame)
+        if (Keyboard.current != null &&
+            (Keyboard.current.eKey.wasPressedThisFrame ||
+             Keyboard.current.spaceKey.wasPressedThisFrame))
+        {
             NextLine();
+            return;
+        }
+
+        if (Mouse.current != null &&
+            Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            if (lastClickTime >= 0f &&
+                Time.time - lastClickTime <= doubleClickThreshold)
+            {
+                NextLine();
+                lastClickTime = -1f;
+            }
+            else
+            {
+                lastClickTime = Time.time;
+            }
+        }
     }
 
     private void NextLine()

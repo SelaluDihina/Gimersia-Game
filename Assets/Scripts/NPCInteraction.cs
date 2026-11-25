@@ -9,10 +9,15 @@ public class NPCInteraction : MonoBehaviour
     [SerializeField] private GameObject dialoguePanel;
     [SerializeField] private TMP_Text dialogueText;
 
+    [Header("Input")]
+    [SerializeField] private float doubleClickThreshold = 0.3f;
+
     public bool IsDialogueOpen { get; private set; }
 
     private bool playerInRange;
     private int currentLine;
+
+    private float lastClickTime = -1f;
 
     private GameObject player;
     private PlayerMovement playerMovement;
@@ -75,19 +80,47 @@ Kalau perusahaan itu biang keroknya, kita harus buktikan kalau tanah kita bisa s
         if (IntroDialogue.IsPlaying || IntroDialogue.FinishedThisFrame)
             return;
 
-        if (Keyboard.current == null)
-            return;
-
-        if (!Keyboard.current.eKey.wasPressedThisFrame)
-            return;
-
-        if (IsDialogueOpen)
+        if (!IsDialogueOpen)
         {
-            NextLine();
+            if (playerInRange &&
+                Keyboard.current != null &&
+                Keyboard.current.eKey.wasPressedThisFrame)
+            {
+                StartDialogue();
+            }
+
+            return;
         }
-        else if (playerInRange)
+
+        bool nextPressed = false;
+
+        if (Keyboard.current != null)
         {
-            StartDialogue();
+            nextPressed =
+                Keyboard.current.eKey.wasPressedThisFrame ||
+                Keyboard.current.spaceKey.wasPressedThisFrame;
+        }
+
+        if (nextPressed)
+        {
+            lastClickTime = -1f;
+            NextLine();
+            return;
+        }
+
+        if (Mouse.current != null &&
+            Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            if (lastClickTime >= 0f &&
+                Time.time - lastClickTime <= doubleClickThreshold)
+            {
+                lastClickTime = -1f;
+                NextLine();
+            }
+            else
+            {
+                lastClickTime = Time.time;
+            }
         }
     }
 
@@ -125,6 +158,7 @@ Kalau perusahaan itu biang keroknya, kita harus buktikan kalau tanah kita bisa s
 
         IsDialogueOpen = true;
         currentLine = 0;
+        lastClickTime = -1f;
 
         dialoguePanel.SetActive(true);
 
@@ -156,6 +190,7 @@ Kalau perusahaan itu biang keroknya, kita harus buktikan kalau tanah kita bisa s
     {
         dialoguePanel.SetActive(false);
         IsDialogueOpen = false;
+        lastClickTime = -1f;
 
         if (playerMovement != null)
             playerMovement.enabled = true;
