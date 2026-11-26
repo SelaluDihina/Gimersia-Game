@@ -10,6 +10,17 @@ public class LoadoutManager : MonoBehaviour
     [Range(1, 5)][SerializeField] private int targetYellow = 3;
     [Range(1, 5)][SerializeField] private int targetGreen = 2;
 
+    [Header("Visual Pot di Meja (a=Kosong, b=Pohon, c=Pupuk, d=Pohon+Pupuk | 1=Kering, 2=Basah)")]
+    [SerializeField] private Image potDisplayImage;
+    [SerializeField] private Sprite potA1_EmptyDry;
+    [SerializeField] private Sprite potA2_EmptyWet;
+    [SerializeField] private Sprite potB1_TreeDry;
+    [SerializeField] private Sprite potB2_TreeWet;
+    [SerializeField] private Sprite potC1_FertilizerDry;
+    [SerializeField] private Sprite potC2_FertilizerWet;
+    [SerializeField] private Sprite potD1_TreeFertilizerDry;
+    [SerializeField] private Sprite potD2_TreeFertilizerWet;
+
     [Header("Sistem Tab Kategori (Urutan: 0=Pohon, 1=Air, 2=Pupuk, 3=Item)")]
     [SerializeField] private GameObject[] categoryPanels;
     [SerializeField] private Button[] tabButtons;
@@ -94,7 +105,6 @@ public class LoadoutManager : MonoBehaviour
     {
         if (activeCircle == null || !hasInitializedCircle) return;
 
-        // Geser lingkaran secara mulus lurus ke target tanpa membal atau jiggle
         Vector2 pos = activeCircle.anchoredPosition;
         pos.x = Mathf.Lerp(pos.x, targetCircleX, Time.deltaTime * tabSlideSpeed);
         activeCircle.anchoredPosition = pos;
@@ -130,14 +140,12 @@ public class LoadoutManager : MonoBehaviour
 
     public void SwitchTab(int activeIndex)
     {
-        // Tampilkan panel kategori yang dipilih
         for (int i = 0; i < categoryPanels.Length; i++)
         {
             if (categoryPanels[i] != null)
                 categoryPanels[i].SetActive(i == activeIndex);
         }
 
-        // Atur transparansi ikon tab aktif vs tidak aktif
         for (int i = 0; i < tabIcons.Length; i++)
         {
             if (tabIcons[i] != null)
@@ -148,7 +156,6 @@ public class LoadoutManager : MonoBehaviour
             }
         }
 
-        // Atur target posisi X untuk activeCircle
         if (activeCircle != null && activeIndex >= 0 && activeIndex < tabButtons.Length && tabButtons[activeIndex] != null)
         {
             RectTransform targetBtnRect = tabButtons[activeIndex].GetComponent<RectTransform>();
@@ -175,7 +182,6 @@ public class LoadoutManager : MonoBehaviour
     {
         slotList.Clear();
 
-        // Sisakan child(0) sebagai pil indikator warna di paling kiri
         for (int i = barContainer.childCount - 1; i >= 1; i--)
         {
             Destroy(barContainer.GetChild(i).gameObject);
@@ -302,7 +308,43 @@ public class LoadoutManager : MonoBehaviour
         finalYellow = Mathf.Clamp(rawYellow, 0, targetYellow);
         finalGreen = Mathf.Clamp(rawGreen, 0, targetGreen);
 
+        UpdatePotVisual();
         RefreshBarDisplay();
+    }
+
+    private void UpdatePotVisual()
+    {
+        if (potDisplayImage == null) return;
+
+        bool hasTree = selectedTree != null;
+        bool hasWater = selectedWater != null;
+        bool hasFertilizer = selectedFertilizer != null;
+
+        Sprite targetSprite = null;
+
+        if (!hasTree && !hasFertilizer)
+        {
+            // a: Kosongan
+            targetSprite = hasWater ? potA2_EmptyWet : potA1_EmptyDry;
+        }
+        else if (hasTree && !hasFertilizer)
+        {
+            // b: Ada daun/pohon
+            targetSprite = hasWater ? potB2_TreeWet : potB1_TreeDry;
+        }
+        else if (!hasTree && hasFertilizer)
+        {
+            // c: Ada pupuk
+            targetSprite = hasWater ? potC2_FertilizerWet : potC1_FertilizerDry;
+        }
+        else
+        {
+            // d: Ada daun/pohon dan pupuk
+            targetSprite = hasWater ? potD2_TreeFertilizerWet : potD1_TreeFertilizerDry;
+        }
+
+        if (targetSprite != null)
+            potDisplayImage.sprite = targetSprite;
     }
 
     private void RefreshBarDisplay()

@@ -855,8 +855,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 82, y: 50}
+  m_AnchoredPosition: {x: -0.000048876, y: -6.8}
+  m_SizeDelta: {x: 86.2476, y: 63.8121}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &416692767
 MonoBehaviour:
@@ -1454,6 +1454,15 @@ MonoBehaviour:
   targetRed: 4
   targetYellow: 3
   targetGreen: 2
+  potDisplayImage: {fileID: 1069725667}
+  potA1_EmptyDry: {fileID: 21300000, guid: 5bee596e2bed2c046b751c00272cee87, type: 3}
+  potA2_EmptyWet: {fileID: 21300000, guid: 588e427c4661fc84cbcbb5daf66f2301, type: 3}
+  potB1_TreeDry: {fileID: 21300000, guid: 1a9da428a94475941a4993158cf69441, type: 3}
+  potB2_TreeWet: {fileID: 21300000, guid: 7e609c341dfa9fa45b58df1376ff84b2, type: 3}
+  potC1_FertilizerDry: {fileID: 21300000, guid: a37ce93bd11cc6246b11db7eafd88ed4, type: 3}
+  potC2_FertilizerWet: {fileID: 21300000, guid: 31975f30447a3a9499fe3d7e7a7091e6, type: 3}
+  potD1_TreeFertilizerDry: {fileID: 21300000, guid: a7a5517c79bd51741806a416b311d7d2, type: 3}
+  potD2_TreeFertilizerWet: {fileID: 21300000, guid: e6f31b4ac2e853243808fd9327f30c12, type: 3}
   categoryPanels:
   - {fileID: 113450393}
   - {fileID: 544271035}
@@ -2065,9 +2074,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 7971498871667320158, guid: 83029c48865af2a47a73c1eeda14f2f2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5bee596e2bed2c046b751c00272cee87, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -3375,8 +3384,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 67, y: 50}
+  m_AnchoredPosition: {x: -0.000031471, y: -2.2}
+  m_SizeDelta: {x: 71.3006, y: 54.7308}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1891787354
 MonoBehaviour:
@@ -3845,8 +3854,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 43, y: 53}
+  m_AnchoredPosition: {x: -0.000011444, y: -0.000021577}
+  m_SizeDelta: {x: 62.3896, y: 64.8654}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2136530498
 MonoBehaviour:
