@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,9 +6,9 @@ using TMPro;
 public class LoadoutManager : MonoBehaviour
 {
     [Header("Target Misi Saat Ini")]
-    [SerializeField] private int targetRed = 4;
-    [SerializeField] private int targetYellow = 3;
-    [SerializeField] private int targetGreen = 5;
+    [Range(1, 5)][SerializeField] private int targetRed = 4;
+    [Range(1, 5)][SerializeField] private int targetYellow = 3;
+    [Range(1, 5)][SerializeField] private int targetGreen = 2;
 
     [Header("Sistem Tab Kategori (Urutan: 0=Pohon, 1=Air, 2=Pupuk, 3=Item)")]
     [SerializeField] private GameObject[] categoryPanels;
@@ -19,11 +18,6 @@ public class LoadoutManager : MonoBehaviour
     [SerializeField] private float tabSlideSpeed = 15f;
     [Range(0f, 1f)][SerializeField] private float activeIconAlpha = 1f;
     [Range(0f, 1f)][SerializeField] private float inactiveIconAlpha = 0.35f;
-
-    [Header("Animasi Balik Halaman (Notepad Page Curl)")]
-    [SerializeField] private Image pageCurlOverlay;
-    [SerializeField] private Sprite[] curlFrames;
-    [SerializeField] private float curlFrameDuration = 0.035f;
 
     [Header("Tombol Submission")]
     [SerializeField] private Button submitButton;
@@ -57,31 +51,33 @@ public class LoadoutManager : MonoBehaviour
     [SerializeField] private Transform greenBarContainer;
 
     [Header("Warna Pengisian Bar Target & Hover Preview")]
-    [SerializeField] private Color emptySlotColor = Color.white;
+    [SerializeField] private Color emptySlotColor = new Color(0.87f, 0.84f, 0.80f);
     [SerializeField] private Color filledRedColor = new Color(0.9f, 0.25f, 0.25f);
     [SerializeField] private Color filledYellowColor = new Color(0.95f, 0.8f, 0.2f);
     [SerializeField] private Color filledGreenColor = new Color(0.25f, 0.8f, 0.35f);
     [Range(0f, 1f)][SerializeField] private float hoverPreviewAlpha = 0.7f;
 
+    // Status item yang sedang dipilih pemain
     private ItemSlotUI selectedTree;
     private ItemSlotUI selectedWater;
     private ItemSlotUI selectedFertilizer;
     private readonly List<ItemSlotUI> selectedItems = new List<ItemSlotUI>();
     private const int MAX_GENERAL_ITEMS = 2;
 
+    // Daftar slot bar target di pojok kiri bawah
     private readonly List<Image> redTargetSlots = new List<Image>();
     private readonly List<Image> yellowTargetSlots = new List<Image>();
     private readonly List<Image> greenTargetSlots = new List<Image>();
 
+    // Total poin stat saat ini
     private int finalRed;
     private int finalYellow;
     private int finalGreen;
 
+    // Variabel hover & posisi geser tab circle
     private ItemSlotUI hoveredSlot;
     private float targetCircleX;
     private bool hasInitializedCircle;
-    private int currentTabIndex = -1;
-    private Coroutine pageCurlCoroutine;
 
     private void Start()
     {
@@ -90,21 +86,18 @@ public class LoadoutManager : MonoBehaviour
         PopulateAllCategories();
         RecalculateAndRefreshUI();
 
-        if (pageCurlOverlay != null)
-            pageCurlOverlay.gameObject.SetActive(false);
-
         Canvas.ForceUpdateCanvases();
-        SwitchTab(0, instant: true);
+        SwitchTab(0);
     }
 
     private void Update()
     {
-        if (activeCircle != null && hasInitializedCircle)
-        {
-            Vector2 pos = activeCircle.anchoredPosition;
-            pos.x = Mathf.Lerp(pos.x, targetCircleX, Time.deltaTime * tabSlideSpeed);
-            activeCircle.anchoredPosition = pos;
-        }
+        if (activeCircle == null || !hasInitializedCircle) return;
+
+        // Geser lingkaran secara mulus lurus ke target tanpa membal atau jiggle
+        Vector2 pos = activeCircle.anchoredPosition;
+        pos.x = Mathf.Lerp(pos.x, targetCircleX, Time.deltaTime * tabSlideSpeed);
+        activeCircle.anchoredPosition = pos;
     }
 
     private void SetupTabsAndSubmit()
@@ -125,7 +118,7 @@ public class LoadoutManager : MonoBehaviour
         {
             int index = i;
             tabButtons[i].onClick.RemoveAllListeners();
-            tabButtons[i].onClick.AddListener(() => SwitchTab(index, instant: false));
+            tabButtons[i].onClick.AddListener(() => SwitchTab(index));
         }
 
         if (submitButton != null)
@@ -137,17 +130,14 @@ public class LoadoutManager : MonoBehaviour
 
     public void SwitchTab(int activeIndex)
     {
-        SwitchTab(activeIndex, instant: false);
-    }
+        // Tampilkan panel kategori yang dipilih
+        for (int i = 0; i < categoryPanels.Length; i++)
+        {
+            if (categoryPanels[i] != null)
+                categoryPanels[i].SetActive(i == activeIndex);
+        }
 
-    private void SwitchTab(int activeIndex, bool instant)
-    {
-        if (activeIndex == currentTabIndex && !instant) return;
-
-        bool isForward = activeIndex > currentTabIndex;
-        currentTabIndex = activeIndex;
-
-        // Update warna ikon tab dan posisi target ActiveCircle langsung agar responsif
+        // Atur transparansi ikon tab aktif vs tidak aktif
         for (int i = 0; i < tabIcons.Length; i++)
         {
             if (tabIcons[i] != null)
@@ -158,75 +148,20 @@ public class LoadoutManager : MonoBehaviour
             }
         }
 
+        // Atur target posisi X untuk activeCircle
         if (activeCircle != null && activeIndex >= 0 && activeIndex < tabButtons.Length && tabButtons[activeIndex] != null)
         {
             RectTransform targetBtnRect = tabButtons[activeIndex].GetComponent<RectTransform>();
             targetCircleX = targetBtnRect.anchoredPosition.x;
-            hasInitializedCircle = true;
 
-            if (instant)
+            if (!hasInitializedCircle)
             {
                 Vector2 pos = activeCircle.anchoredPosition;
                 pos.x = targetCircleX;
                 activeCircle.anchoredPosition = pos;
+                hasInitializedCircle = true;
             }
         }
-
-        // Jika instan atau aset curl belum dipasang, langsung ganti panel tanpa animasi
-        if (instant || pageCurlOverlay == null || curlFrames == null || curlFrames.Length == 0)
-        {
-            ApplyActivePanel(activeIndex);
-            return;
-        }
-
-        if (pageCurlCoroutine != null)
-            StopCoroutine(pageCurlCoroutine);
-
-        pageCurlCoroutine = StartCoroutine(PlayPageCurlRoutine(activeIndex, isForward));
-    }
-
-    private void ApplyActivePanel(int activeIndex)
-    {
-        for (int i = 0; i < categoryPanels.Length; i++)
-        {
-            if (categoryPanels[i] != null)
-                categoryPanels[i].SetActive(i == activeIndex);
-        }
-    }
-
-    private IEnumerator PlayPageCurlRoutine(int targetPanelIndex, bool isForward)
-    {
-        pageCurlOverlay.gameObject.SetActive(true);
-        int midIndex = curlFrames.Length / 2;
-
-        if (isForward)
-        {
-            // Maju (kanan): Curl_1 -> Curl_5
-            for (int i = 0; i < curlFrames.Length; i++)
-            {
-                pageCurlOverlay.sprite = curlFrames[i];
-                if (i == midIndex)
-                    ApplyActivePanel(targetPanelIndex);
-
-                yield return new WaitForSeconds(curlFrameDuration);
-            }
-        }
-        else
-        {
-            // Mundur (kiri): Curl_5 -> Curl_1
-            for (int i = curlFrames.Length - 1; i >= 0; i--)
-            {
-                pageCurlOverlay.sprite = curlFrames[i];
-                if (i == midIndex)
-                    ApplyActivePanel(targetPanelIndex);
-
-                yield return new WaitForSeconds(curlFrameDuration);
-            }
-        }
-
-        ApplyActivePanel(targetPanelIndex);
-        pageCurlOverlay.gameObject.SetActive(false);
-        pageCurlCoroutine = null;
     }
 
     private void SetupTargetBars()
@@ -240,6 +175,7 @@ public class LoadoutManager : MonoBehaviour
     {
         slotList.Clear();
 
+        // Sisakan child(0) sebagai pil indikator warna di paling kiri
         for (int i = barContainer.childCount - 1; i >= 1; i--)
         {
             Destroy(barContainer.GetChild(i).gameObject);
