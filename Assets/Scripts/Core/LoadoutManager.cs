@@ -12,6 +12,7 @@ public class LoadoutManager : MonoBehaviour
 
     [Header("Visual Pot di Meja (a=Kosong, b=Pohon, c=Pupuk, d=Pohon+Pupuk | 1=Kering, 2=Basah)")]
     [SerializeField] private Image potDisplayImage;
+    [SerializeField] private PotTransitionEffect potTransitionEffect;
     [SerializeField] private Sprite potA1_EmptyDry;
     [SerializeField] private Sprite potA2_EmptyWet;
     [SerializeField] private Sprite potB1_TreeDry;
@@ -85,10 +86,11 @@ public class LoadoutManager : MonoBehaviour
     private int finalYellow;
     private int finalGreen;
 
-    // Variabel hover & posisi geser tab circle
+    // Variabel hover, posisi geser tab circle, & status awal pot
     private ItemSlotUI hoveredSlot;
     private float targetCircleX;
     private bool hasInitializedCircle;
+    private bool hasInitializedPot;
 
     private void Start()
     {
@@ -324,27 +326,34 @@ public class LoadoutManager : MonoBehaviour
 
         if (!hasTree && !hasFertilizer)
         {
-            // a: Kosongan
             targetSprite = hasWater ? potA2_EmptyWet : potA1_EmptyDry;
         }
         else if (hasTree && !hasFertilizer)
         {
-            // b: Ada daun/pohon
             targetSprite = hasWater ? potB2_TreeWet : potB1_TreeDry;
         }
         else if (!hasTree && hasFertilizer)
         {
-            // c: Ada pupuk
             targetSprite = hasWater ? potC2_FertilizerWet : potC1_FertilizerDry;
         }
         else
         {
-            // d: Ada daun/pohon dan pupuk
             targetSprite = hasWater ? potD2_TreeFertilizerWet : potD1_TreeFertilizerDry;
         }
 
         if (targetSprite != null)
+        {
+            bool isSpriteChanged = potDisplayImage.sprite != targetSprite;
             potDisplayImage.sprite = targetSprite;
+
+            // Picu asap hanya saat sprite pot benar-benar berubah setelah game dimulai
+            if (hasInitializedPot && isSpriteChanged && potTransitionEffect != null)
+            {
+                potTransitionEffect.PlayTransition();
+            }
+        }
+
+        hasInitializedPot = true;
     }
 
     private void RefreshBarDisplay()
