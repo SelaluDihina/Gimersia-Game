@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
@@ -7,6 +6,7 @@ public class NPCInteraction : MonoBehaviour
 {
     [Header("Dialogue UI")]
     [SerializeField] private GameObject dialoguePanel;
+    [SerializeField] private TMP_Text speakerNameText;
     [SerializeField] private TMP_Text dialogueText;
 
     [Header("Input")]
@@ -22,57 +22,94 @@ public class NPCInteraction : MonoBehaviour
     private GameObject player;
     private PlayerMovement playerMovement;
 
-    private readonly string[] dialogueLines =
+    private class DialogueLine
     {
-        @"NARASI
+        public string speaker;
+        public string text;
 
-Pintu Kios Botani diketuk kencang dari luar. Saat pemain membukanya, Pak Karto berdiri dengan wajah cemas dan napas memburu.",
+        public DialogueLine(string speaker, string text)
+        {
+            this.speaker = speaker;
+            this.text = text;
+        }
+    }
 
-        @"PAK KARTO
+    private readonly DialogueLine[] dialogueLines =
+    {
+        new DialogueLine(
+            "NARASI",
+            "Pintu Kios Botani diketuk kencang dari luar. Saat pemain membukanya, Pak Karto berdiri dengan wajah cemas dan napas memburu."
+        ),
 
-Nak, ayo ikut aku sebentar ke belakang rumah! Kamu harus lihat sendiri kondisi lahanku sekarang.",
+        new DialogueLine(
+            "PAK KARTO",
+            "Nak, ayo ikut aku sebentar ke belakang rumah! Kamu harus lihat sendiri kondisi lahanku sekarang."
+        ),
 
-        @"NARASI
+        new DialogueLine(
+            "NARASI",
+            "Pemain mengikuti Pak Karto keluar kios menuju halaman belakang rumahnya yang gersang. Terlihat tanahnya pecah-pecah parah, sementara sumur di dekatnya tampak kering kosong."
+        ),
 
-Pemain mengikuti Pak Karto keluar kios menuju halaman belakang rumahnya yang gersang. Terlihat tanahnya pecah-pecah parah, sementara sumur di dekatnya tampak kering kosong.",
+        new DialogueLine(
+            "PAK KARTO",
+            "Lihat ini. Sumur di belakang rumahku kering total! Dan yang bikin aku bingung, tanah di sini tetap retak-retak dan keras kayak batu, walaupun hujan sudah sering turun belakangan ini."
+        ),
 
-        @"PAK KARTO
+        new DialogueLine(
+            "PAK KARTO",
+            "Air hujannya kayak numpang lewat begitu saja, gak mau meresap ke dalam. Padahal dulu, musim hujan sedikit saja tanah langsung gembur. Entah kenapa alam sekarang jadi rusak begini..."
+        ),
 
-Lihat ini. Sumur di belakang rumahku kering total! Dan yang bikin aku bingung, tanah di sini tetap retak-retak dan keras kayak batu, walaupun hujan sudah sering turun belakangan ini.
+        new DialogueLine(
+            "PEMAIN",
+            "Ini bukan salah alam, Pak. Sepertinya semua kekeringan dan kerusakan ini terjadi akibat perluasan kebun sawit PT XXX yang tidak terkontrol."
+        ),
 
-Air hujannya kayak numpang lewat begitu saja, gak mau meresap ke dalam. Padahal dulu, musim hujan sedikit saja tanah langsung gembur. Entah kenapa alam sekarang jadi rusak begini...",
+        new DialogueLine(
+            "PEMAIN",
+            "Pembabatan hutan di utara itu pastinya merusak siklus air di desa kita. Akar sawit menyedot habis air tanah, makanya tanah bapak jadi keras dan sumur warga kering."
+        ),
 
-        @"PEMAIN
+        new DialogueLine(
+            "PAK KARTO",
+            "Perkebunan sawit itu...? Pantas saja sejak mereka buka blok baru di utara, sumur di kampung kita perlahan ambles. Jadi bukan karena kutukan musim ya?"
+        ),
 
-Ini bukan salah alam, Pak. Sepertinya semua kekeringan dan kerusakan ini terjadi akibat perluasan kebun sawit PT XXX yang tidak terkontrol. Pembabatan hutan di utara itu pastinya merusak siklus air di desa kita. Akar sawit menyedot habis air tanah, makanya tanah bapak jadi keras dan sumur warga kering.",
+        new DialogueLine(
+            "PAK KARTO",
+            "Terus, apa tanah sekeras ini masih bisa diselamatkan? Tanaman apa pun yang kutanam pasti langsung mati."
+        ),
 
-        @"PAK KARTO
+        new DialogueLine(
+            "PEMAIN",
+            "Tenang, Pak. Kita bisa perbaiki struktur tanahnya dari dalam. Tunggu sebentar, aku ambilkan racikan bibitnya di kios."
+        ),
 
-Perkebunan sawit itu...? Pantas saja sejak mereka buka blok baru di utara, sumur di kampung kita perlahan ambles. Jadi bukan karena kutukan musim ya?
+        new DialogueLine(
+            "RACIKAN TANAMAN",
+            "Media Tanam: Tanah Humus\nPohon Utama: Bambu Betung\nTanaman Sela: Akar Wangi / Vetiver"
+        ),
 
-Terus, apa tanah sekeras ini masih bisa diselamatkan? Tanaman apa pun yang kutanam pasti langsung mati.",
+        new DialogueLine(
+            "PEMAIN",
+            "Tanam Bambu Betung dan Akar Wangi ini di dekat sumur bapak, pakai media tanah humus yang kubawa."
+        ),
 
-        @"PEMAIN
+        new DialogueLine(
+            "PEMAIN",
+            "Akar wanginya nanti bakal menembus dan memecah lapisan tanah yang keras itu supaya pori-porinya terbuka lebar, jadi air hujan bisa meresap ke dalam dan memulihkan kelembapan tanah, sementara batang bambunya bantu nyimpen cadangan air."
+        ),
 
-Tenang, Pak. Kita bisa perbaiki struktur tanahnya dari dalam. Tunggu sebentar, aku ambilkan racikan bibitnya di kios.",
+        new DialogueLine(
+            "PAK KARTO",
+            "Pantesan selama ini hujan deras pun tanahku tetap kering di dalam. Baiklah, langsung kutanam sekarang di dekat sumur."
+        ),
 
-        @"RACIKAN TANAMAN
-
-Media Tanam: Tanah Humus
-Pohon Utama: Bambu Betung
-Tanaman Sela: Akar Wangi / Vetiver",
-
-        @"PEMAIN
-
-Tanam Bambu Betung dan Akar Wangi ini di dekat sumur bapak, pakai media tanah humus yang kubawa.
-
-Akar wanginya nanti bakal menembus dan memecah lapisan tanah yang keras itu supaya pori-porinya terbuka lebar, jadi air hujan bisa meresap ke dalam dan memulihkan kelembapan tanah, sementara batang bambunya bantu nyimpen cadangan air.",
-
-        @"PAK KARTO
-
-Pantesan selama ini hujan deras pun tanahku tetap kering di dalam. Baiklah, langsung kutanam sekarang di dekat sumur.
-
-Kalau perusahaan itu biang keroknya, kita harus buktikan kalau tanah kita bisa subur lagi."
+        new DialogueLine(
+            "PAK KARTO",
+            "Kalau perusahaan itu biang keroknya, kita harus buktikan kalau tanah kita bisa subur lagi."
+        )
     };
 
     private void Update()
@@ -150,7 +187,9 @@ Kalau perusahaan itu biang keroknya, kita harus buktikan kalau tanah kita bisa s
 
     private void StartDialogue()
     {
-        if (dialoguePanel == null || dialogueText == null)
+        if (dialoguePanel == null ||
+            speakerNameText == null ||
+            dialogueText == null)
         {
             Debug.LogError("Dialogue UI NPC belum dihubungkan!");
             return;
@@ -183,7 +222,10 @@ Kalau perusahaan itu biang keroknya, kita harus buktikan kalau tanah kita bisa s
 
     private void ShowLine()
     {
-        dialogueText.text = dialogueLines[currentLine];
+        DialogueLine line = dialogueLines[currentLine];
+
+        speakerNameText.text = line.speaker;
+        dialogueText.text = line.text;
     }
 
     private void EndDialogue()

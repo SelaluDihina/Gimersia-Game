@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
@@ -7,6 +6,7 @@ public class IntroDialogue : MonoBehaviour
 {
     [Header("Dialogue UI")]
     [SerializeField] private GameObject dialoguePanel;
+    [SerializeField] private TMP_Text speakerNameText;
     [SerializeField] private TMP_Text dialogueText;
 
     [Header("Player")]
@@ -21,27 +21,49 @@ public class IntroDialogue : MonoBehaviour
     private int currentLine;
     private float lastClickTime = -1f;
 
-    private readonly string[] introLines =
+    private class DialogueLine
     {
-        @"PEMAIN (MONOLOG / MENGELUH)
+        public string speaker;
+        public string text;
 
-Suhu udara akhir-akhir ini benar-benar tidak masuk akal... Rasanya seperti dipanggang hidup-hidup. Padahal masih jam tiga siang.",
+        public DialogueLine(string speaker, string text)
+        {
+            this.speaker = speaker;
+            this.text = text;
+        }
+    }
 
-        @"PEMAIN (MONOLOG)
+    private readonly DialogueLine[] introLines =
+    {
+        new DialogueLine(
+            "PEMAIN (MONOLOG)",
+            "Suhu udara akhir-akhir ini benar-benar tidak masuk akal... Rasanya seperti dipanggang hidup-hidup, padahal masih jam tiga siang."
+        ),
 
-Untungnya, di dalam kios ini suhunya masih agak mendingan. Berkat koleksi pepohonan dan tanaman polikultur yang kutanam di sekitar toko, setidaknya tempat ini bisa sedikit meredam panasnya kondisi lingkungan di luar.",
+        new DialogueLine(
+            "PEMAIN (MONOLOG)",
+            "Untungnya, di dalam kios ini suhunya masih agak mendingan."
+        ),
 
-        @"PEMAIN (MONOLOG)
+        new DialogueLine(
+            "PEMAIN (MONOLOG)",
+            "Berkat koleksi pepohonan dan tanaman polikultur yang kutanam di sekitar toko, setidaknya tempat ini bisa sedikit meredam panasnya kondisi lingkungan di luar."
+        ),
 
-Tapi, perlindungan sekecil ini tidak akan bertahan lama kalau daerah sekitarnya terus dibiarkan seperti ini.",
+        new DialogueLine(
+            "PEMAIN (MONOLOG)",
+            "Tapi, perlindungan sekecil ini tidak akan bertahan lama kalau daerah sekitarnya terus dibiarkan seperti ini."
+        ),
 
-        @"PEMAIN (MONOLOG)
+        new DialogueLine(
+            "PEMAIN (MONOLOG)",
+            "Semua panas dan kekeringan ekstrem ini sepertinya terjadi akibat ulah PT XXX. Deforestasi untuk membuka lahan sawit secara masif itu pastinya telah merusak kondisi di desa ini."
+        ),
 
-Semua panas dan kekeringan ekstrem ini sepertinya terjadi akibat ulah PT XXX. Deforestasi untuk membuka lahan sawit secara masif itu pastinya telah merusak kondisi di desa ini.",
-
-        @"PEMAIN (MONOLOG)
-
-Rasanya, akar-akar sawit itu menyedot habis air tanah tanpa menyisakan apa pun, makanya wajar kalau sumur-sumur warga sekarang kering dan tanah berubah panas seperti gurun."
+        new DialogueLine(
+            "PEMAIN (MONOLOG)",
+            "Rasanya, akar-akar sawit itu menyedot habis air tanah tanpa menyisakan apa pun, makanya wajar kalau sumur-sumur warga sekarang kering dan tanah berubah panas seperti gurun."
+        )
     };
 
     private void Awake()
@@ -55,7 +77,9 @@ Rasanya, akar-akar sawit itu menyedot habis air tanah tanpa menyisakan apa pun, 
 
     private void Start()
     {
-        if (dialoguePanel == null || dialogueText == null)
+        if (dialoguePanel == null ||
+            speakerNameText == null ||
+            dialogueText == null)
         {
             Debug.LogError("Intro Dialogue UI belum dihubungkan!");
             IsPlaying = false;
@@ -115,7 +139,10 @@ Rasanya, akar-akar sawit itu menyedot habis air tanah tanpa menyisakan apa pun, 
 
     private void ShowLine()
     {
-        dialogueText.text = introLines[currentLine];
+        DialogueLine line = introLines[currentLine];
+
+        speakerNameText.text = line.speaker;
+        dialogueText.text = line.text;
     }
 
     private void EndIntro()
