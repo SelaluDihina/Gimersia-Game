@@ -57,7 +57,7 @@ public class IntroDialogue : MonoBehaviour
 
         new DialogueLine(
             "PEMAIN (MONOLOG)",
-            "Semua panas dan kekeringan ekstrem ini sepertinya terjadi akibat ulah PT XXX. Deforestasi untuk membuka lahan sawit secara masif itu pastinya telah merusak kondisi di desa ini."
+            "Semua panas dan kekeringan ekstrem ini sepertinya terjadi akibat ulah PT Arsari. Deforestasi untuk membuka lahan sawit secara masif itu pastinya telah merusak kondisi di desa ini."
         ),
 
         new DialogueLine(
@@ -77,6 +77,14 @@ public class IntroDialogue : MonoBehaviour
 
     private void Start()
     {
+        if (GameProgress.HasWatchedIntro)
+        {
+            IsPlaying = false;
+            if (dialoguePanel != null) dialoguePanel.SetActive(false);
+            if (playerMovement != null) playerMovement.enabled = true;
+            return;
+        }
+
         if (dialoguePanel == null ||
             speakerNameText == null ||
             dialogueText == null)
@@ -147,6 +155,7 @@ public class IntroDialogue : MonoBehaviour
 
     private void EndIntro()
     {
+        GameProgress.HasWatchedIntro = true;
         dialoguePanel.SetActive(false);
 
         if (playerMovement != null)

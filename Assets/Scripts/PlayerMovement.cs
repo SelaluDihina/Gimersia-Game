@@ -14,7 +14,6 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        // Mengambil Animator & SpriteRenderer dari child object "Visual"
         anim = GetComponentInChildren<Animator>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
@@ -57,15 +56,27 @@ public class PlayerMovement : MonoBehaviour
         rb.linearVelocity = moveInput * moveSpeed;
     }
 
+    private void OnDisable()
+    {
+        moveInput = Vector2.zero;
+
+        if (rb != null)
+            rb.linearVelocity = Vector2.zero;
+
+        if (anim != null)
+        {
+            anim.SetFloat("Horizontal", 0f);
+            anim.SetFloat("Vertical", 0f);
+        }
+    }
+
     private void UpdateAnimation()
     {
         if (anim == null) return;
 
-        // Mengirim nilai arah gerak ke Blend Tree di Animator
         anim.SetFloat("Horizontal", moveInput.x);
         anim.SetFloat("Vertical", moveInput.y);
 
-        // Flip gambar ke kiri sementara menunggu aset PlayerLeft dari artist
         if (spriteRenderer != null && moveInput.x != 0)
         {
             spriteRenderer.flipX = moveInput.x < 0;

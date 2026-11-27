@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -12,6 +11,7 @@ public class SceneTransitionPoint : MonoBehaviour
     [Header("Interaction UI")]
     [SerializeField] private GameObject prompt;
     [SerializeField] private TMP_Text promptText;
+    [SerializeField] private string promptMessage = "[E] Pergi";
 
     private bool playerInRange;
     private bool isLoading;
@@ -29,13 +29,14 @@ public class SceneTransitionPoint : MonoBehaviour
             prompt.SetActive(false);
 
         if (promptText != null)
-            promptText.text = "[E] Pergi";
+            promptText.text = promptMessage;
     }
 
     private void Update()
     {
         bool dialogueActive =
             IntroDialogue.IsPlaying ||
+            IntroDialogue.FinishedThisFrame ||
             (npcInteraction != null && npcInteraction.IsDialogueOpen);
 
         bool canInteract =

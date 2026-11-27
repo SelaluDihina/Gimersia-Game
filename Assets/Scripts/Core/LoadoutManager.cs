@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class LoadoutManager : MonoBehaviour
@@ -31,8 +32,11 @@ public class LoadoutManager : MonoBehaviour
     [Range(0f, 1f)][SerializeField] private float activeIconAlpha = 1f;
     [Range(0f, 1f)][SerializeField] private float inactiveIconAlpha = 0.35f;
 
-    [Header("Tombol Submission")]
+    [Header("Tombol Submission & Transisi Kembali")]
     [SerializeField] private Button submitButton;
+    [SerializeField] private TextMeshProUGUI feedbackText;
+    [SerializeField] private string returnSceneName = "MainScene";
+    [SerializeField] private float returnDelay = 1.5f;
 
     [Header("Daftar Item Tersedia (Masukkan ScriptableObject)")]
     [SerializeField] private List<LoadoutItemSO> treeItems;
@@ -69,24 +73,20 @@ public class LoadoutManager : MonoBehaviour
     [SerializeField] private Color filledGreenColor = new Color(0.25f, 0.8f, 0.35f);
     [Range(0f, 1f)][SerializeField] private float hoverPreviewAlpha = 0.7f;
 
-    // Status item yang sedang dipilih pemain
     private ItemSlotUI selectedTree;
     private ItemSlotUI selectedWater;
     private ItemSlotUI selectedFertilizer;
     private readonly List<ItemSlotUI> selectedItems = new List<ItemSlotUI>();
     private const int MAX_GENERAL_ITEMS = 2;
 
-    // Daftar slot bar target di pojok kiri bawah
     private readonly List<Image> redTargetSlots = new List<Image>();
     private readonly List<Image> yellowTargetSlots = new List<Image>();
     private readonly List<Image> greenTargetSlots = new List<Image>();
 
-    // Total poin stat saat ini
     private int finalRed;
     private int finalYellow;
     private int finalGreen;
 
-    // Variabel hover, posisi geser tab circle, & status awal pot
     private ItemSlotUI hoveredSlot;
     private float targetCircleX;
     private bool hasInitializedCircle;
@@ -94,6 +94,9 @@ public class LoadoutManager : MonoBehaviour
 
     private void Start()
     {
+        if (feedbackText != null)
+            feedbackText.text = "";
+
         SetupTabsAndSubmit();
         SetupTargetBars();
         PopulateAllCategories();
@@ -346,7 +349,6 @@ public class LoadoutManager : MonoBehaviour
             bool isSpriteChanged = potDisplayImage.sprite != targetSprite;
             potDisplayImage.sprite = targetSprite;
 
-            // Picu asap hanya saat sprite pot benar-benar berubah setelah game dimulai
             if (hasInitializedPot && isSpriteChanged && potTransitionEffect != null)
             {
                 potTransitionEffect.PlayTransition();
@@ -452,6 +454,8 @@ public class LoadoutManager : MonoBehaviour
         if (selectedTree == null)
         {
             Debug.LogWarning("Submission Gagal: Kamu belum memilih Pohon!");
+            if (feedbackText != null)
+                feedbackText.text = "Pilih pohon utama dulu!";
             return;
         }
 
@@ -461,11 +465,27 @@ public class LoadoutManager : MonoBehaviour
 
         if (isStatsComplete)
         {
-            Debug.Log($"Submission BERHASIL! Pohon: {selectedTree.ItemData.itemName} | Stats: ({finalRed}, {finalYellow}, {finalGreen})");
+            Debug.Log($"Submission BERHASIL! Pohon: {selectedTree.ItemData.itemName}");
+            GameProgress.IsMissionCompleted = true;
+
+            if (submitButton != null)
+                submitButton.interactable = false;
+
+            if (feedbackText != null)
+                feedbackText.text = "Racikan berhasil! Kembali ke desa...";
+
+            Invoke(nameof(ReturnToMainScene), returnDelay);
         }
         else
         {
             Debug.LogWarning($"Submission Gagal: Stats belum memenuhi target! Saat ini ({finalRed}/{targetRed}, {finalYellow}/{targetYellow}, {finalGreen}/{targetGreen})");
+            if (feedbackText != null)
+                feedbackText.text = $"Stat belum pas! ({finalRed}/{targetRed}, {finalYellow}/{targetYellow}, {finalGreen}/{targetGreen})";
         }
+    }
+
+    private void ReturnToMainScene()
+    {
+        SceneManager.LoadScene(returnSceneName);
     }
 }

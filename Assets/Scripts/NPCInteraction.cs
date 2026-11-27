@@ -63,7 +63,7 @@ public class NPCInteraction : MonoBehaviour
 
         new DialogueLine(
             "PEMAIN",
-            "Ini bukan salah alam, Pak. Sepertinya semua kekeringan dan kerusakan ini terjadi akibat perluasan kebun sawit PT XXX yang tidak terkontrol."
+            "Ini bukan salah alam, Pak. Sepertinya semua kekeringan dan kerusakan ini terjadi akibat perluasan kebun sawit PT Arsari yang tidak terkontrol."
         ),
 
         new DialogueLine(
@@ -111,6 +111,29 @@ public class NPCInteraction : MonoBehaviour
             "Kalau perusahaan itu biang keroknya, kita harus buktikan kalau tanah kita bisa subur lagi."
         )
     };
+
+    private readonly DialogueLine[] reminderLines =
+    {
+        new DialogueLine(
+            "PAK KARTO",
+            "Jangan lupa racikannya ya Nak: Tanah Humus, Bambu Betung, dan Akar Wangi (Vetiver). Segera siapkan di meja racik!"
+        )
+    };
+
+    private readonly DialogueLine[] completedLines =
+    {
+        new DialogueLine(
+            "PAK KARTO",
+            "Lihat sumurnya, Nak! Airnya sudah mulai naik lagi dan tanahnya perlahan gembur. Terima kasih banyak sudah menyelamatkan lahan desa kita!"
+        )
+    };
+
+    private DialogueLine[] GetActiveLines()
+    {
+        if (GameProgress.IsMissionCompleted) return completedLines;
+        if (GameProgress.HasTalkedToKarto) return reminderLines;
+        return dialogueLines;
+    }
 
     private void Update()
     {
@@ -211,7 +234,7 @@ public class NPCInteraction : MonoBehaviour
     {
         currentLine++;
 
-        if (currentLine >= dialogueLines.Length)
+        if (currentLine >= GetActiveLines().Length)
         {
             EndDialogue();
             return;
@@ -222,7 +245,7 @@ public class NPCInteraction : MonoBehaviour
 
     private void ShowLine()
     {
-        DialogueLine line = dialogueLines[currentLine];
+        DialogueLine line = GetActiveLines()[currentLine];
 
         speakerNameText.text = line.speaker;
         dialogueText.text = line.text;
@@ -230,6 +253,7 @@ public class NPCInteraction : MonoBehaviour
 
     private void EndDialogue()
     {
+        GameProgress.HasTalkedToKarto = true;
         dialoguePanel.SetActive(false);
         IsDialogueOpen = false;
         lastClickTime = -1f;
