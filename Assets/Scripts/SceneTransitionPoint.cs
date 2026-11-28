@@ -32,7 +32,7 @@ public class SceneTransitionPoint : MonoBehaviour
             if (!string.IsNullOrEmpty(targetSceneName))
             {
                 GameProgress.NextSpawnPointName = spawnPointInTargetScene;
-                SceneFader.LoadScene(targetSceneName);
+                SceneManager.LoadScene(targetSceneName);
             }
         }
     }
