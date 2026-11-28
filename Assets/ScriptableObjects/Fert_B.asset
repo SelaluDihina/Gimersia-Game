@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 864480dd49993354caf33e3526263b36, type: 3}
   m_Name: Fert_B
   m_EditorClassIdentifier: Assembly-CSharp::LoadoutItemSO
-  itemName: 
+  itemName: Sekam Bakar
   category: 2
   icon: {fileID: 0}
   merah: 2
