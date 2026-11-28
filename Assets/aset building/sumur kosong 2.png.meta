@@ -66,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 1500
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -115,116 +115,6 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: sumur kosong 2_0
-      rect:
-        serializedVersion: 2
-        x: 121
-        y: 2380
-        width: 33
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1ea80da08b9c2f6b0800000000000000
-      internalID: -5263923222150083871
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: sumur kosong 2_1
-      rect:
-        serializedVersion: 2
-        x: 417
-        y: 2345
-        width: 43
-        height: 21
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: faf1ca0c428d96890800000000000000
-      internalID: -7464197255026958417
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: sumur kosong 2_2
-      rect:
-        serializedVersion: 2
-        x: 394
-        y: 2304
-        width: 21
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 418243c588e193500800000000000000
-      internalID: 376365614873454612
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: sumur kosong 2_3
-      rect:
-        serializedVersion: 2
-        x: 250
-        y: 2272
-        width: 14
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b450ba6e702c8ae90800000000000000
-      internalID: -7014143080439020213
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: sumur kosong 2_4
-      rect:
-        serializedVersion: 2
-        x: 344
-        y: 2277
-        width: 30
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a1d0b154b350bf290800000000000000
-      internalID: -7855679372897088230
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: sumur kosong 2_5
       rect:
         serializedVersion: 2
@@ -233,7 +123,7 @@ TextureImporter:
         width: 1532
         height: 1626
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -250,7 +140,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 0e2012c004a204143be622d9eaa545c5
     internalID: 0
     vertices: []
     indices: 
@@ -266,6 +156,8 @@ TextureImporter:
       sumur kosong 2_3: -7014143080439020213
       sumur kosong 2_4: -7855679372897088230
       sumur kosong 2_5: -2555014052869649483
+      sumur kosong 2_6: -512647999
+      sumur kosong 2_7: 1147012133
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
