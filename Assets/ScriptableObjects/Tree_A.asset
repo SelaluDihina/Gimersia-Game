@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 864480dd49993354caf33e3526263b36, type: 3}
   m_Name: Tree_A
   m_EditorClassIdentifier: Assembly-CSharp::LoadoutItemSO
-  itemName: 
+  itemName: Bambu Petung
   category: 0
   icon: {fileID: 0}
   merah: 0
