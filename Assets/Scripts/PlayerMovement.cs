@@ -18,6 +18,31 @@ public class PlayerMovement : MonoBehaviour
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
+    private void Start()
+    {
+        if (!string.IsNullOrEmpty(GameProgress.NextSpawnPointName))
+        {
+            GameObject spawnPoint = GameObject.Find(GameProgress.NextSpawnPointName);
+            if (spawnPoint != null)
+            {
+                Vector3 targetPos = new Vector3(
+                    spawnPoint.transform.position.x,
+                    spawnPoint.transform.position.y,
+                    transform.position.z
+                );
+                transform.position = targetPos;
+                if (rb != null)
+                    rb.position = targetPos;
+            }
+            else
+            {
+                Debug.LogWarning("Titik respawn tidak ditemukan: " + GameProgress.NextSpawnPointName);
+            }
+
+            GameProgress.NextSpawnPointName = "";
+        }
+    }
+
     private void Update()
     {
         if (Keyboard.current == null)

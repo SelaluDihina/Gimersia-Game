@@ -7,6 +7,7 @@ public class SceneTransitionPoint : MonoBehaviour
 {
     [Header("Scene Destination")]
     [SerializeField] private string targetSceneName = "MissionScene";
+    [SerializeField] private string returnSpawnPointName = "";
 
     [Header("Interaction UI")]
     [SerializeField] private GameObject prompt;
@@ -75,6 +76,11 @@ public class SceneTransitionPoint : MonoBehaviour
                 targetSceneName
             );
             return;
+        }
+
+        if (!string.IsNullOrEmpty(returnSpawnPointName))
+        {
+            GameProgress.NextSpawnPointName = returnSpawnPointName;
         }
 
         isLoading = true;
