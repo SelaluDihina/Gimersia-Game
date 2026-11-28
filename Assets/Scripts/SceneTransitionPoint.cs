@@ -6,88 +6,68 @@ using TMPro;
 public class SceneTransitionPoint : MonoBehaviour
 {
     [Header("Scene Destination")]
-    [SerializeField] private string targetSceneName = "MissionScene";
-    [SerializeField] private string returnSpawnPointName = "";
+    [SerializeField] private string targetSceneName;
+    [SerializeField] private string spawnPointInTargetScene;
 
     [Header("Interaction UI")]
     [SerializeField] private GameObject prompt;
     [SerializeField] private TMP_Text promptText;
-    [SerializeField] private string promptMessage = "[E] Pergi";
+    [SerializeField] private string promptMessage = "Interact";
 
     private bool playerInRange;
-    private bool isLoading;
-
-    private NPCInteraction npcInteraction;
-
-    private void Awake()
-    {
-        npcInteraction = FindFirstObjectByType<NPCInteraction>();
-    }
+    private bool ignoreUntilExit;
 
     private void Start()
     {
         if (prompt != null)
             prompt.SetActive(false);
-
-        if (promptText != null)
-            promptText.text = promptMessage;
     }
 
     private void Update()
     {
-        bool dialogueActive =
-            IntroDialogue.IsPlaying ||
-            IntroDialogue.FinishedThisFrame ||
-            (npcInteraction != null && npcInteraction.IsDialogueOpen);
+        if (!playerInRange || ignoreUntilExit) return;
 
-        bool canInteract =
-            playerInRange &&
-            !dialogueActive &&
-            !isLoading;
-
-        if (prompt != null && prompt.activeSelf != canInteract)
-            prompt.SetActive(canInteract);
-
-        if (!canInteract || Keyboard.current == null)
-            return;
-
-        if (Keyboard.current.eKey.wasPressedThisFrame)
-            TransitionScene();
+        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            if (!string.IsNullOrEmpty(targetSceneName))
+            {
+                GameProgress.NextSpawnPointName = spawnPointInTargetScene;
+                SceneFader.LoadScene(targetSceneName);
+            }
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-            playerInRange = true;
+        if (!other.CompareTag("Player")) return;
+
+        // Abaikan sentuhan pertama jika Player spawn di dalam area trigger
+        if (Time.timeSinceLevelLoad < 0.1f)
+        {
+            ignoreUntilExit = true;
+            playerInRange = false;
+            return;
+        }
+
+        if (ignoreUntilExit) return;
+
+        playerInRange = true;
+
+        if (promptText != null)
+            promptText.text = promptMessage;
+
+        if (prompt != null)
+            prompt.SetActive(true);
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-            playerInRange = false;
-    }
+        if (!other.CompareTag("Player")) return;
 
-    private void TransitionScene()
-    {
-        if (!Application.CanStreamedLevelBeLoaded(targetSceneName))
-        {
-            Debug.LogError(
-                "Scene tidak ditemukan atau belum terdaftar: " +
-                targetSceneName
-            );
-            return;
-        }
-
-        if (!string.IsNullOrEmpty(returnSpawnPointName))
-        {
-            GameProgress.NextSpawnPointName = returnSpawnPointName;
-        }
-
-        isLoading = true;
+        ignoreUntilExit = false;
+        playerInRange = false;
 
         if (prompt != null)
             prompt.SetActive(false);
-
-        SceneManager.LoadScene(targetSceneName);
     }
 }

@@ -43,6 +43,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+
     private void Update()
     {
         if (Keyboard.current == null)
@@ -94,6 +95,8 @@ public class PlayerMovement : MonoBehaviour
             anim.SetFloat("Vertical", 0f);
         }
     }
+
+
 
     private void UpdateAnimation()
     {
